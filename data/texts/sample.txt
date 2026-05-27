@@ -1,0 +1,4 @@
+Hello from Flask!
+This is a sample text file stored in the data/texts folder.
+It is being read dynamically by the feature2 endpoint.
+Have a wonderful day!

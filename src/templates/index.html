@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A modern, high-performance Python Flask template application with decoupled architecture.">
+    <title>Flask Demo Application - Port 19191</title>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <main class="container" id="main-container">
+        <header class="header">
+            <div class="badge" id="status-badge">
+                <span class="badge-dot"></span>
+                <span>Active on Port 19191</span>
+            </div>
+            <h1>Flask Application</h1>
+            <p>A decoupled structure with separate source and test directories</p>
+        </header>
+
+        <section class="info-card" id="deployment-details">
+            <div class="info-item">
+                <span class="info-label">Structure</span>
+                <span class="info-value">src/ &amp; test/</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Port</span>
+                <span class="info-value">19191</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Framework</span>
+                <span class="info-value">Python Flask</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Environment</span>
+                <span class="info-value">Development</span>
+            </div>
+        </section>
+
+        <div class="btn-container">
+            <button id="fetch-btn" type="button">
+                Test Health Check API
+            </button>
+        </div>
+
+        <div class="console-box" id="console-box">
+            <div class="console-title">
+                <span>GET /api/health</span>
+                <span id="response-time"></span>
+            </div>
+            <pre><code id="json-output">// Click the button to fetch dynamic state</code></pre>
+        </div>
+
+        <section class="features-section" id="interactive-features">
+            <h2 class="section-title">Feature Endpoints</h2>
+            
+            <!-- Feature 1: Picture API -->
+            <div class="feature-card">
+                <h3>Feature 1: Serve Picture</h3>
+                <p class="feature-desc">Serve dynamic images securely from the images storage folder.</p>
+                <div class="input-group">
+                    <input type="text" id="pic-name-input" value="sample.png" placeholder="e.g. sample.png">
+                    <button id="pic-fetch-btn" type="button">Load Image</button>
+                </div>
+                <div class="image-preview-container" id="image-preview-container">
+                    <span class="preview-placeholder" id="pic-placeholder">Image preview will appear here</span>
+                    <img id="image-preview" src="" alt="Dynamic Image Preview" style="display: none;">
+                </div>
+            </div>
+
+            <!-- Feature 2: Text API -->
+            <div class="feature-card">
+                <h3>Feature 2: Serve Text File</h3>
+                <p class="feature-desc">Read and display the contents of text files securely.</p>
+                <div class="input-group">
+                    <input type="text" id="txt-name-input" value="sample.txt" placeholder="e.g. sample.txt">
+                    <button id="txt-fetch-btn" type="button">Read File</button>
+                </div>
+                <div class="text-preview-container" id="text-preview-container">
+                    <pre><code id="text-preview-output">File contents will appear here...</code></pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- JavaScript logic -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
