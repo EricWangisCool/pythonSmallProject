@@ -102,4 +102,79 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+    // Feature 3: S3 Upload
+    const uploadZone = document.getElementById('upload-zone');
+    const s3FileInput = document.getElementById('s3-file-input');
+    const s3UploadBtn = document.getElementById('s3-upload-btn');
+    const uploadStatus = document.getElementById('upload-status');
+    const uploadResultBox = document.getElementById('upload-result-box');
+    const uploadDownloadLink = document.getElementById('upload-download-link');
+    const uploadSelectedFile = document.getElementById('upload-selected-file');
+
+    if (uploadZone && s3FileInput) {
+        // Click zone to open file picker
+        uploadZone.addEventListener('click', () => s3FileInput.click());
+
+        // Drag-and-drop events
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('drag-over');
+        });
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('drag-over');
+        });
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length > 0) {
+                s3FileInput.files = e.dataTransfer.files;
+                uploadSelectedFile.textContent = e.dataTransfer.files[0].name;
+            }
+        });
+
+        // Show selected file name
+        s3FileInput.addEventListener('change', () => {
+            if (s3FileInput.files.length > 0) {
+                uploadSelectedFile.textContent = s3FileInput.files[0].name;
+            }
+        });
+    }
+
+    if (s3UploadBtn) {
+        s3UploadBtn.addEventListener('click', async () => {
+            const file = s3FileInput && s3FileInput.files[0];
+            if (!file) {
+                uploadStatus.textContent = '⚠️ Please select a file first.';
+                return;
+            }
+
+            // Reset UI
+            uploadResultBox.style.display = 'none';
+            uploadStatus.innerHTML = '<span class="spinner"></span> Uploading to S3...';
+            s3UploadBtn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                const resp = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+                const data = await resp.json();
+
+                if (resp.ok && data.download_url) {
+                    uploadStatus.textContent = '';
+                    uploadDownloadLink.href = data.download_url;
+                    uploadDownloadLink.textContent = `Download ${file.name}`;
+                    uploadResultBox.style.display = 'flex';
+                } else {
+                    uploadStatus.textContent = `❌ Error: ${data.error || 'Unknown error'}`;
+                }
+            } catch (err) {
+                uploadStatus.textContent = `❌ Network error: ${err.message}`;
+            } finally {
+                s3UploadBtn.disabled = false;
+            }
+        });
+    }
 });
