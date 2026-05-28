@@ -22,6 +22,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application source code
 COPY . .
 
+RUN pip install python-dotenv
+
 # Change ownership to non-root user
 RUN chown -R appuser:appgroup /app
 
@@ -30,7 +32,7 @@ USER appuser
 
 EXPOSE 19191
 
-RUN pip install python-dotenv
+
 
 # Default command
 CMD ["python", "run.py"]
