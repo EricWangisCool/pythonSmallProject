@@ -12,8 +12,8 @@ WORKDIR /app
 
 # Install system dependencies (if any) - minimal for Flask
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential \
-        && rm -rf /var/lib/apt/lists/*
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for caching
 COPY requirements.txt .
@@ -29,6 +29,8 @@ RUN chown -R appuser:appgroup /app
 USER appuser
 
 EXPOSE 19191
+
+RUN pip install python-dotenv
 
 # Default command
 CMD ["python", "run.py"]
