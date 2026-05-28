@@ -1,5 +1,12 @@
 import os
 from flask import Flask
+from dotenv import load_dotenv
+
+load_dotenv()
+
+import logging
+logging.basicConfig(level=logging.INFO)
+logging.info(f"S3 bucket from env: {os.getenv('S3_BUCKET_NAME')}")
 
 def create_app(test_config=None):
     """Create and configure an instance of the Flask application."""

@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, render_template, jsonify, send_from_directory, abort
+from flask import Blueprint, render_template, jsonify, send_from_directory, abort, request
 
 bp = Blueprint("views", __name__)
 
@@ -20,6 +20,32 @@ def health():
         "port": 19191,
         "version": "1.0.0"
     })
+
+@bp.route('/upload', methods=['POST'])
+def upload_file():
+    """Handle file upload to S3 and return a presigned download URL.
+    Expects multipart/form-data with a field named 'file'.
+    """
+    from .s3_client import upload_file_to_s3, generate_presigned_download_url
+    import os
+    # Load bucket name from environment (via dotenv)
+    bucket_name = os.getenv('S3_BUCKET_NAME')
+    if not bucket_name:
+        return jsonify({'error': 'S3 bucket name not configured'}), 500
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part in request'}), 400
+    file_obj = request.files['file']
+    if file_obj.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    # Use a safe object name (could prefix with user id etc.)
+    object_name = file_obj.filename
+    success = upload_file_to_s3(file_obj, bucket_name, object_name)
+    if not success:
+        return jsonify({'error': 'Failed to upload to S3'}), 500
+    url = generate_presigned_download_url(bucket_name, object_name)
+    if not url:
+        return jsonify({'error': 'Failed to generate download URL'}), 500
+    return jsonify({'download_url': url}), 200
 
 @bp.route("/feature1/<picture_name>")
 def feature1(picture_name):
