@@ -100,6 +100,33 @@
             <a id="upload-download-link" href="#" target="_blank" class="download-link-btn">Download File</a>
         </div>
     </div>
+
+    <!-- Feature 4: CPU Load Generator -->
+    <div class="feature-card" id="cpu-generator-card">
+        <h3>Feature 4: CPU Load Generator</h3>
+        <p class="feature-desc">Simulate higher CPU usage by spawning background processes targeting your desired load increase percentage.</p>
+        <div class="input-group">
+            <input type="number" id="cpu-percentage-input" value="5" min="1" max="100" placeholder="e.g. 5">
+            <button id="cpu-start-btn" type="button">Start CPU Load</button>
+            <button id="cpu-stop-btn" type="button" class="btn-danger" style="display: none;">Stop CPU Load</button>
+        </div>
+        <div class="cpu-monitor-container" id="cpu-monitor-container">
+            <div class="cpu-status-row">
+                <span class="cpu-status-label">Status: <strong id="cpu-status-text" class="text-idle">Idle</strong></span>
+                <span class="cpu-cores-label" id="cpu-cores-text">Cores: --</span>
+            </div>
+            <div class="cpu-progress-wrapper">
+                <div class="cpu-progress-bar-bg">
+                    <div class="cpu-progress-bar-fill" id="cpu-progress-bar" style="width: 0%;"></div>
+                </div>
+                <span class="cpu-progress-value" id="cpu-progress-value">0% System CPU</span>
+            </div>
+            <div class="cpu-details-row" id="cpu-details-row" style="display: none;">
+                <span class="cpu-processes-label" id="cpu-processes-text">Processes: 0</span>
+                <span class="cpu-target-label" id="cpu-target-text">Target: 0%</span>
+            </div>
+        </div>
+    </div>
 </section>
     </main>
 
