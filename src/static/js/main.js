@@ -177,4 +177,131 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    // Feature 4: CPU Load Generator Logic
+    const cpuPercentageInput = document.getElementById("cpu-percentage-input");
+    const cpuStartBtn = document.getElementById("cpu-start-btn");
+    const cpuStopBtn = document.getElementById("cpu-stop-btn");
+    const cpuStatusText = document.getElementById("cpu-status-text");
+    const cpuCoresText = document.getElementById("cpu-cores-text");
+    const cpuProgressBar = document.getElementById("cpu-progress-bar");
+    const cpuProgressValue = document.getElementById("cpu-progress-value");
+    const cpuDetailsRow = document.getElementById("cpu-details-row");
+    const cpuProcessesText = document.getElementById("cpu-processes-text");
+    const cpuTargetText = document.getElementById("cpu-target-text");
+
+    let statusIntervalId = null;
+
+    async function updateCPUStatus() {
+        try {
+            const resp = await fetch("/api/cpu/status");
+            if (!resp.ok) return;
+            const data = await resp.json();
+
+            // Update CPU cores
+            if (cpuCoresText) {
+                cpuCoresText.textContent = `Cores: ${data.num_cores}`;
+            }
+
+            // Update real-time system CPU usage progress bar
+            if (cpuProgressBar && cpuProgressValue) {
+                const cpuVal = Math.round(data.system_cpu);
+                cpuProgressBar.style.width = `${cpuVal}%`;
+                cpuProgressValue.textContent = `${cpuVal}% System CPU`;
+
+                // If load is high (> 70%), make it red/orange
+                if (cpuVal > 70) {
+                    cpuProgressBar.classList.add("high-load");
+                } else {
+                    cpuProgressBar.classList.remove("high-load");
+                }
+            }
+
+            // Update active state and buttons
+            if (data.running) {
+                if (cpuStatusText) {
+                    cpuStatusText.textContent = `Running (+${data.target_percentage}%)`;
+                    cpuStatusText.className = "text-running";
+                }
+                if (cpuStartBtn) cpuStartBtn.style.display = "none";
+                if (cpuStopBtn) cpuStopBtn.style.display = "inline-flex";
+                if (cpuDetailsRow) cpuDetailsRow.style.display = "flex";
+                if (cpuProcessesText) cpuProcessesText.textContent = `Processes: ${data.process_count}`;
+                if (cpuTargetText) cpuTargetText.textContent = `Target: +${data.target_percentage}%`;
+            } else {
+                if (cpuStatusText) {
+                    cpuStatusText.textContent = "Idle";
+                    cpuStatusText.className = "text-idle";
+                }
+                if (cpuStartBtn) cpuStartBtn.style.display = "inline-flex";
+                if (cpuStopBtn) cpuStopBtn.style.display = "none";
+                if (cpuDetailsRow) cpuDetailsRow.style.display = "none";
+            }
+        } catch (err) {
+            console.error("Error polling CPU status:", err);
+        }
+    }
+
+    if (cpuStartBtn) {
+        cpuStartBtn.addEventListener("click", async () => {
+            const percentage = parseInt(cpuPercentageInput.value.trim(), 10);
+            if (isNaN(percentage) || percentage < 1 || percentage > 100) {
+                alert("⚠️ Please enter a valid percentage between 1 and 100.");
+                return;
+            }
+
+            cpuStartBtn.disabled = true;
+            cpuStartBtn.textContent = "Starting...";
+
+            try {
+                const resp = await fetch("/api/cpu/start", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ percentage: percentage })
+                });
+
+                const data = await resp.json();
+                if (resp.ok) {
+                    await updateCPUStatus();
+                } else {
+                    alert(`❌ Error starting CPU load: ${data.error || 'Unknown error'}`);
+                }
+            } catch (err) {
+                alert(`❌ Network error: ${err.message}`);
+            } finally {
+                cpuStartBtn.disabled = false;
+                cpuStartBtn.textContent = "Start CPU Load";
+            }
+        });
+    }
+
+    if (cpuStopBtn) {
+        cpuStopBtn.addEventListener("click", async () => {
+            cpuStopBtn.disabled = true;
+            cpuStopBtn.textContent = "Stopping...";
+
+            try {
+                const resp = await fetch("/api/cpu/stop", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                });
+
+                const data = await resp.json();
+                if (resp.ok) {
+                    await updateCPUStatus();
+                } else {
+                    alert(`❌ Error stopping CPU load: ${data.error || 'Unknown error'}`);
+                }
+            } catch (err) {
+                alert(`❌ Network error: ${err.message}`);
+            } finally {
+                cpuStopBtn.disabled = false;
+                cpuStopBtn.textContent = "Stop CPU Load";
+            }
+        });
+    }
+
+    // Start polling CPU status
+    updateCPUStatus();
+    statusIntervalId = setInterval(updateCPUStatus, 1500);
 });

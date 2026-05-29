@@ -73,3 +73,53 @@ def feature2(file_name):
     except Exception:
         abort(500, description="Internal server error reading file")
 
+@bp.route("/api/cpu/start", methods=["POST"])
+def start_cpu_load():
+    """Start generating CPU load by the specified percentage."""
+    from .cpu_manager import cpu_manager
+    data = request.get_json() or {}
+    percentage = data.get("percentage")
+    
+    if percentage is None:
+        return jsonify({"error": "Percentage is required"}), 400
+        
+    try:
+        percentage = int(percentage)
+    except (ValueError, TypeError):
+        return jsonify({"error": "Percentage must be an integer"}), 400
+        
+    if percentage < 0 or percentage > 100:
+        return jsonify({"error": "Percentage must be between 0 and 100"}), 400
+        
+    try:
+        cpu_manager.start_load(percentage)
+        return jsonify({
+            "message": f"Successfully started CPU load generator at {percentage}%",
+            "status": cpu_manager.get_status()
+        }), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to start CPU load: {str(e)}"}), 500
+
+@bp.route("/api/cpu/stop", methods=["POST"])
+def stop_cpu_load():
+    """Stop the CPU load generator."""
+    from .cpu_manager import cpu_manager
+    try:
+        cpu_manager.stop_all()
+        return jsonify({
+            "message": "Successfully stopped CPU load generator",
+            "status": cpu_manager.get_status()
+        }), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to stop CPU load: {str(e)}"}), 500
+
+@bp.route("/api/cpu/status", methods=["GET"])
+def get_cpu_status():
+    """Get the current CPU load generator status and system-wide CPU usage."""
+    from .cpu_manager import cpu_manager
+    try:
+        return jsonify(cpu_manager.get_status()), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to retrieve CPU status: {str(e)}"}), 500
+
+
